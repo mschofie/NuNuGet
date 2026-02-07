@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>NuNuGet.Reference</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- NuGet Packaging -->
+  <PropertyGroup>
+    <PackageId>NuNuGet.Reference</PackageId>
+    <Version>0.6.0</Version>
+    <Authors>mschofie</Authors>
+    <Company>mschofie</Company>
+    <Title>NuNuGet.Reference</Title>
+    <Description>Reference NuGet for NuNuGet testing.</Description>
+    <PackageDescription>A reference NuGet package for testing NuNuGet.</PackageDescription>
+    <PackageTags>NuGet;Package;Tool</PackageTags>
+    <PackageCompressionLevel>Optimal</PackageCompressionLevel>
+  </PropertyGroup>
+
+</Project>

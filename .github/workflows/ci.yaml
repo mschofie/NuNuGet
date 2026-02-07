@@ -1,0 +1,87 @@
+name: NuNuGet CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.editorconfig'
+      - '.vscode/**'
+      - '*.md'
+  workflow_dispatch:
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+jobs:
+  build:
+    name: Build
+    runs-on: windows-2025
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          filter: blob:none
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Install .NET tools
+        shell: pwsh
+        run: |
+          dotnet tool restore
+
+      - name: Restore
+        shell: pwsh
+        run: |
+          & dotnet restore
+
+      - name: Check formatting
+        shell: pwsh
+        run: |
+          & dotnet format --no-restore --verify-no-changes
+
+      - name: Build (debug)
+        shell: pwsh
+        run: |
+          & dotnet pack --no-restore --configuration Debug /bl:__artifacts/msbuild.debug.binlog
+
+      - name: Test (debug)
+        shell: pwsh
+        run: |
+          & dotnet test --no-restore --configuration Debug
+
+      - name: Build (release)
+        shell: pwsh
+        run: |
+          & dotnet pack --no-restore --configuration Release /bl:__artifacts/msbuild.release.binlog
+
+      - name: Test (debug)
+        shell: pwsh
+        run: |
+          & dotnet test --no-restore --configuration Release
+
+      - name: Publish packages
+        shell: pwsh
+        run: |
+          & dotnet nuget add source --name github "https://nuget.pkg.github.com/mschofie/index.json"
+          Get-ChildItem -Path __artifacts\package\release\MSchofie.*.nupkg |
+            ForEach-Object {
+              & dotnet nuget push $_.FullName --api-key ${{ secrets.PACKAGE_PUBLISH_PAT }} --source "github"
+            }
+
+      - name: Upload 'package' artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: __artifacts_package
+          path: |
+            __artifacts/package
+
+      - name: Upload 'msbuild_binlog' artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: __artifacts_msbuild_binlog
+          path: |
+            __artifacts/msbuild.debug.binlog
+            __artifacts/msbuild.release.binlog

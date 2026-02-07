@@ -1,0 +1,4 @@
+__*
+.vs
+.vscode
+BenchmarkDotNet.Artifacts

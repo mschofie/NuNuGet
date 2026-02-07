@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="Reference\nuget.config" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Reference\Packages.list.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RootPath)NuNuGet\NuNuGet.csproj" />
+    <ProjectReference Include="$(RootPath)Tests\NuNuGet.Reference.0.5\NuNuGet.Reference.0.5.csproj" ReferenceOutputAssembly="false" Targets="pack" />
+    <ProjectReference Include="$(RootPath)Tests\NuNuGet.Reference.0.6\NuNuGet.Reference.0.6.csproj" ReferenceOutputAssembly="false" Targets="pack" />
+  </ItemGroup>
+
+</Project>

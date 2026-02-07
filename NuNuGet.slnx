@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.rsp" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="nuget.config" />
+    <File Path="version.json" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/NuNuGet.Reference.0.5/NuNuGet.Reference.0.5.csproj" />
+    <Project Path="Tests/NuNuGet.Reference.0.6/NuNuGet.Reference.0.6.csproj" />
+    <Project Path="Tests/NuNuGet.Tests/NuNuGet.Tests.csproj" />
+  </Folder>
+  <Project Path="NuNuGet/NuNuGet.csproj" />
+</Solution>

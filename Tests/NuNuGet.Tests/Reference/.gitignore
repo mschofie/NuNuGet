@@ -1,0 +1,5 @@
+# Ignore files written by tests
+packages.lock.json
+packages.list.json
+nuget.config
+

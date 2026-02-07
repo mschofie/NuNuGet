@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "NuNuGet": {
+      "commandName": "Project",
+      "commandLineArgs": "install --configFile .\\nuget.config --lockFile ./packages.lock.file --packageList ./packages.list.json --verbose",
+      "workingDirectory": "Q:\\Source\\github\\mschofie\\NuNuGet\\__nunuget_scenario\\CSharpRestore"
+    },
+    "NuNuGet (no params)": {
+      "commandName": "Project"
+    }
+  }
+}
