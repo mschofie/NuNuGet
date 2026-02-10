@@ -58,7 +58,7 @@ jobs:
         run: |
           & dotnet pack --no-restore --configuration Release /bl:__artifacts/msbuild.release.binlog
 
-      - name: Test (debug)
+      - name: Test (release)
         shell: pwsh
         run: |
           & dotnet test --no-restore --configuration Release
