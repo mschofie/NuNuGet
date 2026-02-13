@@ -31,21 +31,22 @@ Or publish as a single executable (see [Publishing](#publishing) section below).
 Install packages from a package list JSON file:
 
 ```powershell
-NuNuGet install --packageList <path> --configFile <path> --lockFile <path>
+NuNuGet install --listFile <path> --configFile <path> --lockFile <path> [--verbose]
 ```
 
 #### Options
 
 | Option            | Required  | Description                                                           |
 |-------------------|-----------|-----------------------------------------------------------------------|
-| `--packageList`   | Yes       | Path to the `package.list.json` file containing packages to restore   |
-| `--configFile`    | Yes       | Path to the NuGet configuration file (`nuget.config`) to use          |
-| `--lockFile`      | Yes       | Path to the NuGet lock file to generate or use                        |
+| `--configFile`    | Yes       | Path to the NuGet configuration file to use                           |
+| `--listFile`      | Yes       | Path to the `packages.list.json` file to restore                      |
+| `--lockFile`      | Yes       | Path to the NuGet lock file to use                                    |
+| `--verbose`       | No        | Enable verbose output                                                 |
 
 ### Example
 
 ```powershell
-NuNuGet install --packageList ./package.list.json --configFile ./nuget.config --lockFile ./packages.lock.json
+NuNuGet install --configFile ./nuget.config --listFile ./packages.list.json --lockFile ./packages.lock.json --verbose
 ```
 
 ## Package List Format
@@ -99,7 +100,9 @@ dotnet publish .\NuNuGet.csproj --runtime win-arm64 /p:PublishProfile=SingleFile
 
 | Profile                           | Description                                                           |
 |-----------------------------------|-----------------------------------------------------------------------|
+| `SelfContained`                   | Self-contained (no .NET runtime required)                             |
 | `SingleFile`                      | Framework-dependent single file                                       |
+| `SingleFileSelfContained`         | Self-contained single file (no .NET runtime required)                 |
 | `SingleFileTrimmed`               | Framework-dependent with IL trimming &dagger;                         |
 | `SingleFileSelfContainedTrimmed`  | Self-contained with IL trimming (no .NET runtime required) &dagger;   |
 
@@ -116,12 +119,11 @@ dotnet pack --configuration Release /bl
 NuNuGet uses:
 
 - the official NuGet Client SDK libraries:
-    - `NuGet.Commands` - Restore command infrastructure
-    - `NuGet.Protocol` - Package source protocol handlers
-    - `NuGet.Resolver` - Dependency resolution
-    - `NuGet.Packaging` - Package reading and extraction
-    - `NuGet.ProjectModel` - Project model types
-    - `NuGet.Frameworks` - Target framework handling
+  - `NuGet.Commands` - Restore command infrastructure
+  - `NuGet.Common` - Common types and utilities
+  - `NuGet.Packaging` - Package reading and extraction
+  - `NuGet.ProjectModel` - Project model types
+  - `NuGet.Resolver` - Dependency resolution
 
 - `System.CommandLine` - for command-line parsing
 - `Microsoft.Extensions.Logging` - for common logging
