@@ -112,7 +112,7 @@ public class ScenarioTests
 
         // Act: Run NuNuGet.exe to generate the lock file.
         {
-            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--packageList", packagesListPath);
+            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(0, processResult.ExitCode);
             Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
@@ -120,7 +120,7 @@ public class ScenarioTests
 
         // Re-run with the same parameters, check for success and the same output.
         {
-            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--packageList", packagesListPath);
+            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(0, processResult.ExitCode);
             Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
@@ -130,7 +130,7 @@ public class ScenarioTests
         {
             nuGetCli.Add(package060, packageSourcePath);
 
-            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--packageList", packagesListPath);
+            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(0, processResult.ExitCode);
             Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
@@ -140,7 +140,7 @@ public class ScenarioTests
         {
             Touch(packagesListPath);
 
-            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--packageList", packagesListPath);
+            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(0, processResult.ExitCode);
             Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
@@ -157,7 +157,7 @@ public class ScenarioTests
                 ]
             });
 
-            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--packageList", packagesListPath);
+            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(100, processResult.ExitCode);
         }
@@ -166,7 +166,7 @@ public class ScenarioTests
         {
             DeleteFile(packagesLockPath);
 
-            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--packageList", packagesListPath);
+            ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(0, processResult.ExitCode);
             Assert.Contains("NuNuGet.Reference/0.6.0", processResult.StandardOutput);
