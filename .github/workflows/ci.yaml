@@ -124,7 +124,9 @@ jobs:
         id: get_version
         shell: pwsh
         run: |
-          $Version = (& dotnet nbgv get-version --variable AssemblyInformationalVersion)
+          # Since this build is only on 'main', use the 'NuGetPackageVersion' variant of the 'nbgv' version.
+          # This will not include the build-identifiers in the version, which we want for a public release.
+          $Version = (& dotnet nbgv get-version --variable NuGetPackageVersion)
           if (-not $Version) { Write-Error 'Version not found'; exit 1 }
           Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$Version"
 
@@ -140,12 +142,22 @@ jobs:
           Write-Host "Logging into gh"
           Write-Output $env:GITHUB_TOKEN | gh auth login --with-token
 
-          Write-Host "Creating draft release '$Version'"
-          gh release create $Version --draft --title $Version --notes "" --latest=false
+          Write-Host "Creating draft release 'v$Version'"
+          $Arguments = @(
+            "v$Version"
+            "--draft"
+            if ($Version -match '-') {
+              "--prerelease"
+            }
+            "--title", "v$Version"
+            "--notes", ""
+            "--latest=false"
+          )
+          gh release create @Arguments
 
           $files = Get-ChildItem -Path '__artifacts/package/release/MSchofie.*.nupkg' -ErrorAction SilentlyContinue
           if (-not $files) { Write-Host "No .nupkg files found to upload"; exit 0 }
           foreach ($file in $files) {
             Write-Host "Uploading $($file.Name)"
-            gh release upload $Version $file.FullName --clobber
+            gh release upload "v$Version" $file.FullName --clobber
           }
