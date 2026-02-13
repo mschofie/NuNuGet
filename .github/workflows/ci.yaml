@@ -142,12 +142,12 @@ jobs:
           Write-Host "Logging into gh"
           Write-Output $env:GITHUB_TOKEN | gh auth login --with-token
 
-          Write-Host "Creating draft release '$Version'"
-          gh release create $Version --draft --title $Version --notes "" --latest=false
+          Write-Host "Creating draft release 'v$Version'"
+          gh release create "v$Version" --draft --title "v$Version" --notes "" --latest=false
 
           $files = Get-ChildItem -Path '__artifacts/package/release/MSchofie.*.nupkg' -ErrorAction SilentlyContinue
           if (-not $files) { Write-Host "No .nupkg files found to upload"; exit 0 }
           foreach ($file in $files) {
             Write-Host "Uploading $($file.Name)"
-            gh release upload $Version $file.FullName --clobber
+            gh release upload "v$Version" $file.FullName --clobber
           }
