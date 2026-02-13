@@ -29,7 +29,7 @@ internal static class PackageEntryExtensions
 }
 
 /// <summary>
-/// A command that installs packages from a package.list.json file to the global packages folder, using a lock file to ensure repeatable restores and to write out the resolved package graph.
+/// A command that installs packages from a packages.list.json file to the global packages folder, using a lock file to ensure repeatable restores and to write out the resolved package graph.
 /// </summary>
 internal sealed class InstallCommand : Command
 {
@@ -41,9 +41,9 @@ internal sealed class InstallCommand : Command
 
     private FileInfo? ConfigFile { get; set; }
 
-    private string LockFile { get; set; } = string.Empty;
+    private FileInfo? ListFile { get; set; }
 
-    private FileInfo? PackageListFile { get; set; }
+    private string LockFile { get; set; } = string.Empty;
 
     private string ProjectName { get; set; } = "NuNuGet";
 
@@ -52,13 +52,13 @@ internal sealed class InstallCommand : Command
     /// </summary>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to create loggers.</param>
     public InstallCommand(ILoggerFactory loggerFactory)
-        : base("install", "Install packages from a package.list.json file to the global packages folder")
+        : base("install", "Install packages from a packages.list.json file to the global packages folder")
     {
         this.LoggerFactory = loggerFactory;
 
         this.Add(ConfigFileOption.Instance);
+        this.Add(ListFileOption.Instance);
         this.Add(LockFileOption.Instance);
-        this.Add(PackageListOption.Instance);
         this.Add(VerboseOption.Instance);
 
         this.SetAction(this.Invoke);
@@ -66,21 +66,21 @@ internal sealed class InstallCommand : Command
 
     private void ParseOptions(ParseResult parseResult)
     {
-        this.LockFile = parseResult.GetValue(LockFileOption.Instance) ?? throw new InvalidOperationException("Lock file option is required.");
+        this.LockFile = parseResult.GetValue(LockFileOption.Instance) ?? throw new InvalidOperationException("The --lockFile option is required.");
         if (!Path.IsPathFullyQualified(this.LockFile))
         {
             this.LockFile = Path.Combine(this.WorkingDirectory, this.LockFile);
         }
         this.LockFile = Path.GetFullPath(this.LockFile, this.WorkingDirectory);
 
-        this.ConfigFile = parseResult.GetValue(ConfigFileOption.Instance) ?? throw new InvalidOperationException("Config file option is required.");
+        this.ConfigFile = parseResult.GetValue(ConfigFileOption.Instance) ?? throw new InvalidOperationException("The --configFile option is required.");
         if (!this.ConfigFile.Exists)
         {
             throw new InvalidOperationException("Config file does not exist.");
         }
 
-        this.PackageListFile = parseResult.GetValue(PackageListOption.Instance) ?? throw new InvalidOperationException("Package list file option is required.");
-        if (!this.PackageListFile.Exists)
+        this.ListFile = parseResult.GetValue(ListFileOption.Instance) ?? throw new InvalidOperationException("The --listFile option is required.");
+        if (!this.ListFile.Exists)
         {
             throw new InvalidOperationException("Package list file does not exist.");
         }
@@ -91,9 +91,9 @@ internal sealed class InstallCommand : Command
         return Settings.LoadSpecificSettings(this.ConfigFile!.DirectoryName!, this.ConfigFile!.Name);
     }
 
-    private static PackageList LoadPackageList(FileInfo packageListFile)
+    private static PackageList LoadPackageList(FileInfo listFile)
     {
-        using FileStream packageListStream = packageListFile.OpenRead();
+        using FileStream packageListStream = listFile.OpenRead();
         PackageList? packageList = JsonSerializer.Deserialize(packageListStream, PackageListJsonContext.Default.PackageList);
 
         return packageList ?? throw new InvalidOperationException("Failed to deserialize PackageList file.");
@@ -164,7 +164,7 @@ internal sealed class InstallCommand : Command
         string globalPackagesPath = SettingsUtility.GetGlobalPackagesFolder(settings);
 
         // Load and deserialize the package list JSON file
-        PackageList packageList = LoadPackageList(this.PackageListFile!);
+        PackageList packageList = LoadPackageList(this.ListFile!);
 
         PackageSpec packageSpec = this.BuildPackageSpec(packageList, globalPackagesPath);
         DependencyGraphSpec dependencyGraphSpec = new();
@@ -201,11 +201,11 @@ internal sealed class InstallCommand : Command
 
         if (!result.Success)
         {
-            // If result.LogMessages contains a 'NU1004', then the PackageListFile has deviated from the PackageLockFile.
+            // If result.LogMessages contains a 'NU1004', then the ListFile has deviated from the LockFile.
             bool staleLockFile = result.LogMessages.Any(m => m.Code == NuGetLogCode.NU1004);
             if (staleLockFile)
             {
-                Console.Error.WriteLine("Restore failed due to a mismatch between the package list and the lock file. Deleting the lock file to force a rebuild");
+                Console.Error.WriteLine("Restore failed due to a mismatch between the package list and the lock file. Delete the lock file to force a rebuild.");
                 return 100;
             }
 
