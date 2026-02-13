@@ -23,7 +23,7 @@ internal static class PackageEntryExtensions
     {
         return new()
         {
-            LibraryRange = new(package.Id, new VersionRange(NuGetVersion.Parse(package.Version)), LibraryDependencyTarget.Package)
+            LibraryRange = new(package.Id, VersionRange.Parse(package.Version), LibraryDependencyTarget.Package)
         };
     }
 }
