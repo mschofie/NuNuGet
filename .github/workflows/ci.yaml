@@ -139,6 +139,8 @@ jobs:
           $Version = $env:VERSION
           if (-not $Version) { Write-Error 'Version not found'; exit 1 }
 
+          $RefName = if ('${{ github.ref }}' -match 'refs/heads/(.*)') { $Matches[1] }
+
           Write-Host "Logging into gh"
           Write-Output $env:GITHUB_TOKEN | gh auth login --with-token
 
@@ -148,6 +150,9 @@ jobs:
             "--draft"
             if ($Version -match '-') {
               "--prerelease"
+            }
+            if ($RefName) {
+              "--target", $RefName
             }
             "--title", "v$Version"
             "--notes", ""
