@@ -73,7 +73,7 @@ public class ScenarioTests
     [Fact]
     public void EndToEndScenario()
     {
-        NuGetCli nuGetCli = NuGetCli.Create();
+        INuGetCli nuGetCli = NuGetCli.Create();
 
         string nugetConfigPath = Path.Combine(this.ReferenceFolder, "nuget.config");
         string packagesListPath = Path.Combine(this.ReferenceFolder, "packages.list.json");

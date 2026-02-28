@@ -39,7 +39,7 @@ internal sealed class Helper
     public static void WriteFile(string path, string contents)
     {
         using StreamWriter outputFile = new StreamWriter(path);
-        outputFile.WriteLine(contents);
+        outputFile.Write(contents);
     }
 
     public static void Touch(string path)
