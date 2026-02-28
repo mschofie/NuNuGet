@@ -1,0 +1,14 @@
+name: Machine Setup
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v5
+      with:
+        global-json-file: global.json
+
+    - name: Install .NET tools
+      shell: pwsh
+      run: |
+        dotnet tool restore
