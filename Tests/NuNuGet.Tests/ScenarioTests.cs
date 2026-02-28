@@ -8,6 +8,8 @@ using static NuNuGet.Tests.Helper;
 
 public class ScenarioTests
 {
+    private readonly ITestOutputHelper output;
+
     private string ReferenceFolder { get; }
 
     private string OutputFolder { get; }
@@ -20,8 +22,10 @@ public class ScenarioTests
 
     private string ConfigFilePath { get; }
 
-    public ScenarioTests()
+    public ScenarioTests(ITestOutputHelper output)
     {
+        this.output = output;
+
         this.OutputFolder = Path.GetDirectoryName(typeof(ScenarioTests).Assembly.Location)!;
         this.RepositoryRoot = Git.GetRepositoryRoot(this.OutputFolder);
         this.ReferenceFolder = Path.Combine(this.RepositoryRoot, "Tests", "NuNuGet.Tests", "Reference");
@@ -36,6 +40,7 @@ public class ScenarioTests
 
     private ProcessResult RunNuNuGet(params string[] args)
     {
+        this.output.WriteLine($"Running '{this.NuNuGetPath} {string.Join(' ', args)}' in folder '{this.OutputFolder}'");
         return ProcessManagement.RunProcess(this.NuNuGetPath, string.Join(' ', args), this.OutputFolder);
     }
 
