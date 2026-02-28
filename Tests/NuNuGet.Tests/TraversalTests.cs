@@ -193,9 +193,9 @@ public class TraversalTests
                 }]
         });
 
-        Assert.Equal(result, [
+        Assert.Equal([
             ("B", NuGetVersion.Parse("2.0.0")),
             ("A", NuGetVersion.Parse("1.0.0")),
-        ]);
+        ], result);
     }
 }
