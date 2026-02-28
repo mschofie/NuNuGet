@@ -75,14 +75,14 @@ jobs:
             }
 
       - name: Upload 'package' artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: __artifacts_package
           path: |
             __artifacts/package
 
       - name: Upload 'msbuild_binlog' artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: __artifacts_msbuild_binlog
           path: |
