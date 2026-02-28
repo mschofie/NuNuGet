@@ -40,7 +40,8 @@ internal static class Traversal
                 {
                     LockFileDependency = dependency,
                     InDegree = dependency.Dependencies.Count,
-                });
+                },
+                StringComparer.OrdinalIgnoreCase);
 
         // Walk the index and populate the Consumers list for each entry.
         foreach (var (id, dependencyEntry) in index)
