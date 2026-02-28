@@ -163,4 +163,39 @@ public class TraversalTests
         Assert.True(indexOfC < indexOfA, "C should come before A");
         Assert.True(indexOfB < indexOfA, "B should come before A");
     }
+
+    [Fact]
+    public void CaseInsensitivePackageIds()
+    {
+        // Dependency references "b" in lowercase, but the package is declared as "B".
+        IEnumerable<(string, NuGetVersion)> result = Traversal.ReverseTopological(new PackagesLockFile
+        {
+            Targets = [
+                new PackagesLockFileTarget
+                {
+                    Dependencies =
+                    [
+                        new LockFileDependency
+                        {
+                            Id = "A",
+                            ResolvedVersion = NuGetVersion.Parse("1.0.0"),
+                            Dependencies =
+                            [
+                                new PackageDependency("b", VersionRange.Parse("2.0.0"))
+                            ]
+                        },
+                        new LockFileDependency
+                        {
+                            Id = "B",
+                            ResolvedVersion = NuGetVersion.Parse("2.0.0")
+                        },
+                    ]
+                }]
+        });
+
+        Assert.Equal(result, [
+            ("B", NuGetVersion.Parse("2.0.0")),
+            ("A", NuGetVersion.Parse("1.0.0")),
+        ]);
+    }
 }
