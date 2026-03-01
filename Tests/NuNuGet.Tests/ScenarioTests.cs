@@ -8,6 +8,8 @@ using static NuNuGet.Tests.Helper;
 
 public class ScenarioTests
 {
+    private readonly ITestOutputHelper output;
+
     private string ReferenceFolder { get; }
 
     private string OutputFolder { get; }
@@ -20,21 +22,25 @@ public class ScenarioTests
 
     private string ConfigFilePath { get; }
 
-    public ScenarioTests()
+    public ScenarioTests(ITestOutputHelper output)
     {
+        this.output = output;
+
         this.OutputFolder = Path.GetDirectoryName(typeof(ScenarioTests).Assembly.Location)!;
         this.RepositoryRoot = Git.GetRepositoryRoot(this.OutputFolder);
         this.ReferenceFolder = Path.Combine(this.RepositoryRoot, "Tests", "NuNuGet.Tests", "Reference");
-        this.NuNuGetPath = Path.Combine(this.OutputFolder, "NuNuGet.exe");
         this.BuiltPackagesFolder = Path.Combine(this.RepositoryRoot, "__artifacts", "package", Build.GetConfiguration().ToLowerInvariant());
-
         this.ConfigFilePath = Path.Combine(this.ReferenceFolder, "nuget.config");
 
-        Assert.True(File.Exists(this.NuNuGetPath), $"Expected NuNuGet.exe to be present in the working folder: {this.OutputFolder}");
+        string nunugetExecutableName = OperatingSystem.IsWindows() ? "NuNuGet.exe" : "NuNuGet";
+        this.NuNuGetPath = Path.Combine(this.OutputFolder, nunugetExecutableName);
+
+        Assert.True(File.Exists(this.NuNuGetPath), $"Expected {nunugetExecutableName} to be present in the working folder: {this.OutputFolder}");
     }
 
     private ProcessResult RunNuNuGet(params string[] args)
     {
+        this.output.WriteLine($"Running '{this.NuNuGetPath} {string.Join(' ', args)}' in folder '{this.OutputFolder}'");
         return ProcessManagement.RunProcess(this.NuNuGetPath, string.Join(' ', args), this.OutputFolder);
     }
 
