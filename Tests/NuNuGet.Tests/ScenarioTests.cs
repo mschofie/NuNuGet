@@ -38,6 +38,7 @@ public class ScenarioTests
         this.NuNuGetPath = Path.Combine(this.OutputFolder, nunugetExecutableName);
 
         this.ProcessManagement.WorkingDirectory = this.OutputFolder;
+        this.ProcessManagement.EnvironmentVariables["NUGET_PACKAGES"] = null;
 
         Assert.True(File.Exists(this.NuNuGetPath), $"Expected {nunugetExecutableName} to be present in the working folder: {this.OutputFolder}");
     }
@@ -89,6 +90,7 @@ public class ScenarioTests
         string packagesListPath = Path.Combine(this.ReferenceFolder, "packages.list.json");
         string packagesLockPath = Path.Combine(this.ReferenceFolder, "packages.lock.json");
         string packageSourcePath = Path.Combine(this.ReferenceFolder, "__packages");
+        string globalPackagesPath = Path.Combine(this.ReferenceFolder, "__global_packages");
 
         string package050 = Path.Combine(this.BuiltPackagesFolder, "NuNuGet.Reference.0.5.0.nupkg");
         string package060 = Path.Combine(this.BuiltPackagesFolder, "NuNuGet.Reference.0.6.0.nupkg");
@@ -98,10 +100,14 @@ public class ScenarioTests
         //  - Create the 'nuget.config' file, and add the local package source to it.
         //  - Create the 'packages.list.json' file, and add NuNuGet.Reference.0.5 to it.
         //  - Delete the 'packageSourcePath', recreate it, and add NuNuGet.Reference.0.5 to it.
+        //  - Delete the 'globalPackagesPath', recreate it.
         DeleteFile(packagesLockPath);
         WriteFile(nugetConfigPath, $$"""
             <?xml version="1.0" encoding="utf-8"?>
             <configuration>
+                <config>
+                    <add key="globalPackagesFolder" value="{{globalPackagesPath}}" />
+                </config>
                 <packageSources>
                     <clear />
                     <add key="store" value="{{packageSourcePath}}" />
@@ -120,11 +126,15 @@ public class ScenarioTests
         CreateFolder(packageSourcePath);
         nuGetCli.Add(package050, packageSourcePath);
 
+        RemoveFolder(globalPackagesPath);
+        CreateFolder(globalPackagesPath);
+
         // Act: Run NuNuGet.exe to generate the lock file.
         {
             ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(0, processResult.ExitCode);
+            Assert.Contains($"GlobalPackagesPath: {globalPackagesPath}", processResult.StandardOutput);
             Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
         }
 
