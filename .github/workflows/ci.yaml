@@ -14,8 +14,17 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 jobs:
   build:
-    name: Build
-    runs-on: windows-2025
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2025]
+        include:
+          - os: ubuntu-22.04
+            checkFormatting: true
+          - os: windows-2025
+            publishPackages: true
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -24,15 +33,8 @@ jobs:
           fetch-depth: 0
           filter: blob:none
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
-
-      - name: Install .NET tools
-        shell: pwsh
-        run: |
-          dotnet tool restore
+      - name: Machine Setup
+        uses: ./.github/actions/machine-setup
 
       - name: Restore
         shell: pwsh
@@ -40,6 +42,7 @@ jobs:
           & dotnet restore
 
       - name: Check formatting
+        if: ${{ matrix.checkFormatting }}
         shell: pwsh
         run: |
           & dotnet format --no-restore --verify-no-changes
@@ -65,7 +68,7 @@ jobs:
           & dotnet test --no-restore --configuration Release
 
       - name: Publish packages
-        if: ${{ contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref) }}
+        if: ${{ matrix.publishPackages && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref) }}
         shell: pwsh
         run: |
           & dotnet nuget add source --name github "https://nuget.pkg.github.com/mschofie/index.json"
@@ -75,16 +78,16 @@ jobs:
             }
 
       - name: Upload 'package' artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
-          name: __artifacts_package
+          name: __artifacts_package_${{ matrix.os }}
           path: |
             __artifacts/package
 
       - name: Upload 'msbuild_binlog' artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
-          name: __artifacts_msbuild_binlog
+          name: __artifacts_msbuild_binlog_${{ matrix.os }}
           path: |
             __artifacts/msbuild.debug.binlog
             __artifacts/msbuild.release.binlog
@@ -104,20 +107,13 @@ jobs:
           fetch-depth: 0
           filter: blob:none
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
-
-      - name: Install .NET tools
-        shell: pwsh
-        run: |
-          dotnet tool restore
+      - name: Machine Setup
+        uses: ./.github/actions/machine-setup
 
       - name: Download package artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
-          name: __artifacts_package
+          name: __artifacts_package_windows-2025
           path: __artifacts/package
 
       - name: Get version
@@ -139,6 +135,8 @@ jobs:
           $Version = $env:VERSION
           if (-not $Version) { Write-Error 'Version not found'; exit 1 }
 
+          $RefName = if ('${{ github.ref }}' -match 'refs/heads/(.*)') { $Matches[1] }
+
           Write-Host "Logging into gh"
           Write-Output $env:GITHUB_TOKEN | gh auth login --with-token
 
@@ -148,6 +146,9 @@ jobs:
             "--draft"
             if ($Version -match '-') {
               "--prerelease"
+            }
+            if ($RefName) {
+              "--target", $RefName
             }
             "--title", "v$Version"
             "--notes", ""
