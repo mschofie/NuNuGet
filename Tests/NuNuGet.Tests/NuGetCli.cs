@@ -53,7 +53,7 @@ internal sealed class NuGetExeCli : INuGetCli
     /// <inheritdoc />
     public void Add(string packagePath, string source)
     {
-        ProcessResult result = this.ProcessManagement.Run(this.ExecutablePath, $"add {packagePath} -Source {source}");
+        ProcessResult result = this.ProcessManagement.Run(this.ExecutablePath, $"add \"{packagePath}\" -Source \"{source}\"");
         if (result.ExitCode != 0)
         {
             throw new InvalidOperationException($"Failed to add package: {result.StandardOutput}\n {result.StandardError}\n");
