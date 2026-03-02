@@ -29,7 +29,7 @@ public class ScenarioTests
         this.output = output;
 
         this.OutputFolder = Path.GetDirectoryName(typeof(ScenarioTests).Assembly.Location)!;
-        this.RepositoryRoot = Git.GetRepositoryRoot(this.OutputFolder);
+        this.RepositoryRoot = Path.GetFullPath(Git.GetRepositoryRoot(this.OutputFolder));
         this.ReferenceFolder = Path.Combine(this.RepositoryRoot, "Tests", "NuNuGet.Tests", "Reference");
         this.BuiltPackagesFolder = Path.Combine(this.RepositoryRoot, "__artifacts", "package", Build.GetConfiguration().ToLowerInvariant());
         this.ConfigFilePath = Path.Combine(this.ReferenceFolder, "nuget.config");
