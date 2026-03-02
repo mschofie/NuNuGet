@@ -10,6 +10,8 @@ public class ScenarioTests
 {
     private readonly ITestOutputHelper output;
 
+    private ProcessManagement ProcessManagement { get; } = new ProcessManagement();
+
     private string ReferenceFolder { get; }
 
     private string OutputFolder { get; }
@@ -35,13 +37,15 @@ public class ScenarioTests
         string nunugetExecutableName = OperatingSystem.IsWindows() ? "NuNuGet.exe" : "NuNuGet";
         this.NuNuGetPath = Path.Combine(this.OutputFolder, nunugetExecutableName);
 
+        this.ProcessManagement.WorkingDirectory = this.OutputFolder;
+
         Assert.True(File.Exists(this.NuNuGetPath), $"Expected {nunugetExecutableName} to be present in the working folder: {this.OutputFolder}");
     }
 
     private ProcessResult RunNuNuGet(params string[] args)
     {
         this.output.WriteLine($"Running '{this.NuNuGetPath} {string.Join(' ', args)}' in folder '{this.OutputFolder}'");
-        return ProcessManagement.RunProcess(this.NuNuGetPath, string.Join(' ', args), this.OutputFolder);
+        return this.ProcessManagement.Run(this.NuNuGetPath, string.Join(' ', args));
     }
 
     [Fact]

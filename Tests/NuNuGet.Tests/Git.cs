@@ -12,7 +12,12 @@ public static class Git
     /// <exception cref="InvalidOperationException">Thrown when the repository root cannot be determined.</exception>
     public static string GetRepositoryRoot(string fromPath)
     {
-        ProcessResult result = ProcessManagement.RunProcess("git", $"-C {fromPath} rev-parse --show-toplevel", fromPath);
+        ProcessManagement processManagement = new ProcessManagement()
+        {
+            WorkingDirectory = fromPath,
+        };
+
+        ProcessResult result = processManagement.Run("git", $"rev-parse --show-toplevel");
 
         if (result.ExitCode != 0)
         {
