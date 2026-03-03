@@ -10,6 +10,8 @@ public class ScenarioTests
 {
     private readonly ITestOutputHelper output;
 
+    private ProcessManagement ProcessManagement { get; } = new ProcessManagement();
+
     private string ReferenceFolder { get; }
 
     private string OutputFolder { get; }
@@ -27,7 +29,7 @@ public class ScenarioTests
         this.output = output;
 
         this.OutputFolder = Path.GetDirectoryName(typeof(ScenarioTests).Assembly.Location)!;
-        this.RepositoryRoot = Git.GetRepositoryRoot(this.OutputFolder);
+        this.RepositoryRoot = Path.GetFullPath(Git.GetRepositoryRoot(this.OutputFolder));
         this.ReferenceFolder = Path.Combine(this.RepositoryRoot, "Tests", "NuNuGet.Tests", "Reference");
         this.BuiltPackagesFolder = Path.Combine(this.RepositoryRoot, "__artifacts", "package", Build.GetConfiguration().ToLowerInvariant());
         this.ConfigFilePath = Path.Combine(this.ReferenceFolder, "nuget.config");
@@ -35,13 +37,16 @@ public class ScenarioTests
         string nunugetExecutableName = OperatingSystem.IsWindows() ? "NuNuGet.exe" : "NuNuGet";
         this.NuNuGetPath = Path.Combine(this.OutputFolder, nunugetExecutableName);
 
+        this.ProcessManagement.WorkingDirectory = this.OutputFolder;
+        this.ProcessManagement.EnvironmentVariables["NUGET_PACKAGES"] = null;
+
         Assert.True(File.Exists(this.NuNuGetPath), $"Expected {nunugetExecutableName} to be present in the working folder: {this.OutputFolder}");
     }
 
     private ProcessResult RunNuNuGet(params string[] args)
     {
         this.output.WriteLine($"Running '{this.NuNuGetPath} {string.Join(' ', args)}' in folder '{this.OutputFolder}'");
-        return ProcessManagement.RunProcess(this.NuNuGetPath, string.Join(' ', args), this.OutputFolder);
+        return this.ProcessManagement.Run(this.NuNuGetPath, string.Join(' ', args));
     }
 
     [Fact]
@@ -85,6 +90,7 @@ public class ScenarioTests
         string packagesListPath = Path.Combine(this.ReferenceFolder, "packages.list.json");
         string packagesLockPath = Path.Combine(this.ReferenceFolder, "packages.lock.json");
         string packageSourcePath = Path.Combine(this.ReferenceFolder, "__packages");
+        string globalPackagesPath = Path.Combine(this.ReferenceFolder, "__global_packages");
 
         string package050 = Path.Combine(this.BuiltPackagesFolder, "NuNuGet.Reference.0.5.0.nupkg");
         string package060 = Path.Combine(this.BuiltPackagesFolder, "NuNuGet.Reference.0.6.0.nupkg");
@@ -94,10 +100,14 @@ public class ScenarioTests
         //  - Create the 'nuget.config' file, and add the local package source to it.
         //  - Create the 'packages.list.json' file, and add NuNuGet.Reference.0.5 to it.
         //  - Delete the 'packageSourcePath', recreate it, and add NuNuGet.Reference.0.5 to it.
+        //  - Delete the 'globalPackagesPath', recreate it.
         DeleteFile(packagesLockPath);
         WriteFile(nugetConfigPath, $$"""
             <?xml version="1.0" encoding="utf-8"?>
             <configuration>
+                <config>
+                    <add key="globalPackagesFolder" value="{{globalPackagesPath}}" />
+                </config>
                 <packageSources>
                     <clear />
                     <add key="store" value="{{packageSourcePath}}" />
@@ -116,11 +126,15 @@ public class ScenarioTests
         CreateFolder(packageSourcePath);
         nuGetCli.Add(package050, packageSourcePath);
 
+        RemoveFolder(globalPackagesPath);
+        CreateFolder(globalPackagesPath);
+
         // Act: Run NuNuGet.exe to generate the lock file.
         {
             ProcessResult processResult = this.RunNuNuGet("install", "--configFile", nugetConfigPath, "--lockFile", packagesLockPath, "--listFile", packagesListPath);
 
             Assert.Equal(0, processResult.ExitCode);
+            Assert.Contains($"GlobalPackagesPath: {globalPackagesPath}", processResult.StandardOutput);
             Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
         }
 
