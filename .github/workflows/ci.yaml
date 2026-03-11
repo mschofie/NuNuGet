@@ -24,7 +24,6 @@ jobs:
         include:
           - os: ubuntu-22.04
             checkFormatting: true
-          - os: windows-2025
             publishPackages: true
     runs-on: ${{ matrix.os }}
     steps:
