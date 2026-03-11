@@ -20,3 +20,8 @@ updates:
         patterns:
           - "Nerdbank.GitVersioning"
           - "nbgv"
+
+  - package-ecosystem: dotnet-sdk
+    directory: '/'
+    schedule:
+      interval: weekly
