@@ -4,3 +4,19 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+
+  - package-ecosystem: nuget
+    directory: '/'
+    schedule:
+      interval: weekly
+    groups:
+      nuget:
+        patterns:
+          - "NuGet*"
+      xunit:
+        patterns:
+          - "xunit*"
+      gitversioning:
+        patterns:
+          - "Nerdbank.GitVersioning"
+          - "nbgv"
