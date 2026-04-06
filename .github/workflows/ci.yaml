@@ -69,7 +69,7 @@ jobs:
           & dotnet test --no-restore --configuration Release
 
       - name: Publish packages
-        if: ${{ matrix.publishPackages && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref) }}
+        if: ${{ matrix.publishPackages && contains(fromJSON('["refs/heads/main"]'), github.ref) }}
         shell: pwsh
         run: |
           & dotnet nuget add source --name github "https://nuget.pkg.github.com/mschofie/index.json"
