@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '15 6 * * 1'
+permissions:
+  contents: read
+
 jobs:
   analysis:
     name: Scorecard analysis
