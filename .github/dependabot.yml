@@ -25,3 +25,23 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+
+  - package-ecosystem: nuget
+    directory: /NuNuGet
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /Tests/NuNuGet.Reference.0.5
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /Tests/NuNuGet.Reference.0.6
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /Tests/NuNuGet.Tests
+    schedule:
+      interval: daily
