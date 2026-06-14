@@ -12,11 +12,15 @@ on:
   workflow_dispatch:
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build (${{ matrix.os }})
     permissions:
       contents: read
+      actions: write
     strategy:
       fail-fast: false
       matrix:
@@ -98,6 +102,7 @@ jobs:
     needs: build
     runs-on: ubuntu-slim
     permissions:
+      actions: read
       contents: write
     if: ${{ github.event_name == 'push' && contains(fromJSON('["refs/heads/main"]'), github.ref) }}
     steps:
