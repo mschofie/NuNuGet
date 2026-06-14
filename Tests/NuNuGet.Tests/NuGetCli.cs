@@ -41,6 +41,8 @@ internal sealed class NuGetExeCli : INuGetCli
 {
     private const string ExecutableName = "nuget.exe";
 
+    private ProcessManagement ProcessManagement { get; } = new ProcessManagement();
+
     private string ExecutablePath { get; }
 
     internal NuGetExeCli(string path)
@@ -51,7 +53,7 @@ internal sealed class NuGetExeCli : INuGetCli
     /// <inheritdoc />
     public void Add(string packagePath, string source)
     {
-        ProcessResult result = ProcessManagement.RunProcess(this.ExecutablePath, $"add {packagePath} -Source {source}", Environment.CurrentDirectory);
+        ProcessResult result = this.ProcessManagement.Run(this.ExecutablePath, $"add \"{packagePath}\" -Source \"{source}\"");
         if (result.ExitCode != 0)
         {
             throw new InvalidOperationException($"Failed to add package: {result.StandardOutput}\n {result.StandardError}\n");

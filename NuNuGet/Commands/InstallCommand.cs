@@ -33,6 +33,12 @@ internal static class PackageEntryExtensions
 /// </summary>
 internal sealed class InstallCommand : Command
 {
+    private static readonly NuGetFramework[] SpecialTargetFrameworkFallbacks =
+    [
+        NuGetFramework.Parse("net10.0"),
+        NuGetFramework.Parse("net461"),
+    ];
+
     private ILoggerFactory LoggerFactory { get; }
 
     private Logging.ILogger Logger { get; set; } = Logging.Abstractions.NullLogger.Instance;
@@ -99,6 +105,19 @@ internal sealed class InstallCommand : Command
         return packageList ?? throw new InvalidOperationException("Failed to deserialize PackageList file.");
     }
 
+    private static NuGetFramework BuildRestoreFramework(string targetFramework)
+    {
+        NuGetFramework framework = NuGetFramework.Parse(targetFramework);
+
+        if (!string.Equals(targetFramework, "any", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(targetFramework, "native", StringComparison.OrdinalIgnoreCase))
+        {
+            return framework;
+        }
+
+        return new FallbackFramework(framework, [.. SpecialTargetFrameworkFallbacks]);
+    }
+
     private PackageSpec BuildPackageSpec(PackageList packageList, string globalPackagesPath)
     {
         PackageSpec packageSpec = new()
@@ -123,7 +142,7 @@ internal sealed class InstallCommand : Command
 
         packageSpec.TargetFrameworks.Add(new TargetFrameworkInformation
         {
-            FrameworkName = NuGetFramework.Parse(packageList.TargetFramework),
+            FrameworkName = BuildRestoreFramework(packageList.TargetFramework),
             Dependencies = [.. packageList.Packages.Select(p => p.ToLibraryDependency())]
         });
 

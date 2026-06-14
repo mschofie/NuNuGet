@@ -17,14 +17,23 @@ internal sealed class ProcessManagement
 {
     public static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
 
+    public TimeSpan Timeout { get; set; } = DefaultTimeout;
+
+    public string WorkingDirectory { get; set; } = Environment.CurrentDirectory;
+
+    public IDictionary<string, string?> EnvironmentVariables { get; } = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
+    public ProcessManagement()
+    {
+    }
+
     /// <summary>
     /// Runs a process with the given arguments.
     /// </summary>
     /// <param name="exePath">Executable path</param>
     /// <param name="arguments">Process arguments</param>
-    /// <param name="workingDirectory">The working directory of the process</param>
     /// <returns>The result of the process execution.</returns>
-    public static ProcessResult RunProcess(string exePath, string arguments, string workingDirectory)
+    public ProcessResult Run(string exePath, string arguments)
     {
         ProcessStartInfo startInfo = new(exePath)
         {
@@ -32,16 +41,21 @@ internal sealed class ProcessManagement
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            WorkingDirectory = workingDirectory,
+            WorkingDirectory = this.WorkingDirectory,
         };
 
-        return ProcessManagement.RunProcess(startInfo, DefaultTimeout);
-    }
+        foreach ((string name, string? value) in this.EnvironmentVariables)
+        {
+            if (value is null)
+            {
+                _ = startInfo.Environment.Remove(name);
+            }
+            else
+            {
+                startInfo.Environment[name] = value;
+            }
+        }
 
-    public static ProcessResult RunProcess(ProcessStartInfo startInfo) => ProcessManagement.RunProcess(startInfo, DefaultTimeout);
-
-    public static ProcessResult RunProcess(ProcessStartInfo startInfo, TimeSpan timeout)
-    {
         StringBuilder outputBuffer = new();
         StringBuilder errorBuffer = new();
 
@@ -71,10 +85,10 @@ internal sealed class ProcessManagement
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
 
-        bool exited = process.WaitForExit(timeout);
+        bool exited = process.WaitForExit(this.Timeout);
         if (!exited)
         {
-            throw new TimeoutException($"Process did not exit within the timeout of {timeout.TotalSeconds} seconds: ProcessName={process.ProcessName} HasExited={process.HasExited}");
+            throw new TimeoutException($"Process did not exit within the timeout of {this.Timeout.TotalSeconds} seconds: ProcessName={process.ProcessName} HasExited={process.HasExited}");
         }
 
         // Process.WaitForExit(int) will not wait for asynchronous processing to complete. If that overload

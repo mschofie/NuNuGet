@@ -73,7 +73,7 @@ The package list is a JSON file that specifies the target framework and packages
 
 | Property              | Type      | Description                                                               |
 |-----------------------|-----------|---------------------------------------------------------------------------|
-| `targetFramework`     | string    | The target framework moniker (e.g., `native`, `net8.0`, `netstandard2.0`) |
+| `targetFramework`     | string    | The target framework moniker (e.g., `native`, `net8.0`, `netstandard2.0`). `any` and `native` probe common managed fallbacks during restore so framework-specific packages can still resolve. |
 | `packages`            | array     | List of package entries                                                   |
 | `packages[].id`       | string    | The NuGet package identifier                                              |
 | `packages[].version`  | string    | The version string (e.g., `1.8.2109`, `[1.0,2.0)`, `1.*`)                 |
@@ -98,15 +98,16 @@ dotnet publish .\NuNuGet.csproj --runtime win-arm64 /p:PublishProfile=SingleFile
 
 ### Publish Profiles
 
-| Profile                           | Description                                                           |
-|-----------------------------------|-----------------------------------------------------------------------|
-| `SelfContained`                   | Self-contained (no .NET runtime required)                             |
-| `SingleFile`                      | Framework-dependent single file                                       |
-| `SingleFileSelfContained`         | Self-contained single file (no .NET runtime required)                 |
-| `SingleFileTrimmed`               | Framework-dependent with IL trimming &dagger;                         |
-| `SingleFileSelfContainedTrimmed`  | Self-contained with IL trimming (no .NET runtime required) &dagger;   |
+| Profile                             | Description                                                                           |
+|-------------------------------------|---------------------------------------------------------------------------------------|
+| `SelfContained`                     | Self-contained (no .NET runtime required)                                             |
+| `SingleFile`                        | Framework-dependent single file                                                       |
+| `SingleFileSelfContained`           | Self-contained single file (no .NET runtime required)                                 |
+| `SingleFileTrimmed`                 | Framework-dependent with IL trimming &dagger;                                         |
+| `SingleFileSelfContainedTrimmed`    | Self-contained with IL trimming (no .NET runtime required) &dagger;                   |
+| `SingleFileSelfContainedTrimmedAot` | Self-contained with IL trimming (no .NET runtime required) and AOT compiled &dagger;  |
 
-&dagger; - Not yet working; trimming problems exist.
+&dagger; - Not yet working; trimming/AOT problems exist. Used to validate 'NuGet.Client' builds.
 
 ## Packaging
 
