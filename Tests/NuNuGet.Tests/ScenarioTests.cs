@@ -243,4 +243,31 @@ public class ScenarioTests
             Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
         }
     }
+
+    [Fact]
+    public void EndToEndScenario_SpecialTargetFrameworkFallbacks()
+    {
+        foreach (string targetFramework in new[] { "any", "native" })
+        {
+            NuGetEnvironment nuGetEnvironment = new NuGetEnvironment(this.ReferenceFolder);
+
+            WriteObject(nuGetEnvironment.PackagesListPath, new PackageList
+            {
+                TargetFramework = targetFramework,
+                Packages =
+                [
+                    new PackageEntry { Id = "NuNuGet.Reference", Version = "0.5.0" }
+                ]
+            });
+            nuGetEnvironment.AddPackageToSource(TestEnvironment.Package050);
+
+            ProcessResult processResult = this.RunNuNuGet("install",
+                "--configFile", nuGetEnvironment.ConfigPath,
+                "--lockFile", nuGetEnvironment.PackagesLockPath,
+                "--listFile", nuGetEnvironment.PackagesListPath);
+
+            Assert.Equal(0, processResult.ExitCode);
+            Assert.Contains("NuNuGet.Reference/0.5.0", processResult.StandardOutput);
+        }
+    }
 }
