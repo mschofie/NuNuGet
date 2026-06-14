@@ -73,7 +73,7 @@ The package list is a JSON file that specifies the target framework and packages
 
 | Property              | Type      | Description                                                               |
 |-----------------------|-----------|---------------------------------------------------------------------------|
-| `targetFramework`     | string    | The target framework moniker (e.g., `native`, `net8.0`, `netstandard2.0`) |
+| `targetFramework`     | string    | The target framework moniker (e.g., `native`, `net8.0`, `netstandard2.0`). `any` and `native` probe common managed fallbacks during restore so framework-specific packages can still resolve. |
 | `packages`            | array     | List of package entries                                                   |
 | `packages[].id`       | string    | The NuGet package identifier                                              |
 | `packages[].version`  | string    | The version string (e.g., `1.8.2109`, `[1.0,2.0)`, `1.*`)                 |
