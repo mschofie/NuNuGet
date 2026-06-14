@@ -21,6 +21,7 @@ jobs:
     permissions:
       contents: read
       actions: write
+      packages: write
     strategy:
       fail-fast: false
       matrix:
